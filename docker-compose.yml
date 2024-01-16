@@ -1,0 +1,7 @@
+services:
+  static-tar-compiler:
+    build: .
+    volumes:
+      - ./compilers:/app/compilers
+      - ./tars:/app/tars
+    
