@@ -6,6 +6,9 @@ WORKDIR /workspace
 # install utils 
 RUN apt-get update && apt-get install -y git python3 pip python3-dev
 
+# install basic toolchain
+RUN apt-get update && apt-get install -y build-essential make wget file texinfo
+
 # create a folder for the creator script
 RUN mkdir -p /usr/local/creator
 
