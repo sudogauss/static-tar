@@ -53,3 +53,8 @@ dkms.conf
 
 # IDE
 .vscode/
+
+# Compilers
+
+compilers/*
+!compilers/README.md
