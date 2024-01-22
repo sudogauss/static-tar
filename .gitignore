@@ -58,3 +58,8 @@ dkms.conf
 
 compilers/*
 !compilers/README.md
+
+# Tars
+
+tars/*
+!tars/README.md

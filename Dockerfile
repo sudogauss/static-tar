@@ -7,7 +7,7 @@ WORKDIR /workspace
 RUN apt-get update && apt-get install -y git python3 pip python3-dev
 
 # install basic toolchain
-RUN apt-get update && apt-get install -y build-essential make wget file texinfo
+RUN apt-get update && apt-get install -y build-essential make wget file texinfo autoconf automake
 
 # create a folder for the creator script
 RUN mkdir -p /usr/local/creator
@@ -19,7 +19,7 @@ COPY ./creator/ /usr/local/creator/
 RUN git clone https://git.savannah.gnu.org/git/tar.git
 
 # clone musl cross-compilers creator
-RUN git clone https://github.com/sudogauss/musl-cross-make.git
+RUN git clone https://github.com/sudogauss/musl-cross-make.git --branch master
 
 # install launcher
 RUN cd /usr/local/creator && pip install .
