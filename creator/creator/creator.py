@@ -3,9 +3,7 @@ from typing_extensions import Annotated
 from typing import List, Tuple, Any
 from rich import print as rprint
 import os
-import sys
 import shutil
-import subprocess
 
 # CONSTS
 
@@ -51,17 +49,8 @@ def __process_cmd(cmd, cwd: str) -> None:
     """
         Runs a subprocess executing provided command and returns output/stderr line by line
     """
-    proc = subprocess.Popen(cmd, cwd=cwd, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    while True:
-
-        finished_ = proc.poll()
-        line = proc.stdout.readline()
-        line_ = str(line)
-        if len(line_) > 1:
-            yield line_
-
-        if finished_ is not None:
-            break
+    cmd_ = "cd " + cwd + " && " + cmd
+    os.system(cmd_)
 
 
 def __build_compiler(compiler: str) -> None:
@@ -71,8 +60,14 @@ def __build_compiler(compiler: str) -> None:
     src = PATH_TO_PRESETS + "/" + compiler
     dst = PATH_TO_CROSS_MAKE + "/config.mak"
     shutil.copy(src, dst) # Copy compiler config preset and rename it to config.mak
-    for out in __process_cmd(["make", "-j20", "install"], PATH_TO_CROSS_MAKE): # Running make install for configured compiler
-        print(out)
+
+    compiler_out_ = PATH_TO_COMPILERS + "/" + compiler
+
+    if os.path.isdir(compiler_out_):
+        rprint("[italic yellow]Compiler has been already built. Please remove it if you really want to rebuild it.[/italic yellow]")
+        return
+
+    __process_cmd("make -j20 install", PATH_TO_CROSS_MAKE)
 
 
 def __build_tar(compiler: str) -> None:
@@ -88,19 +83,17 @@ def __build_tar(compiler: str) -> None:
     if not os.path.isdir(compiler_dir_):
         rprint("[bold red]Error: compiler does not exist[/bold red]")
 
-    for out in __process_cmd(["./bootstrap"], PATH_TO_TAR): # Bootstrap tar automake system
-        print(out)
+    __process_cmd("./bootstrap", PATH_TO_TAR)
 
     output_ = PATH_TO_TAR_OUTPUT + "/" + compiler + "-tar"
     cc = "CC=" + compiler_executable_
     ld_flags = "LDFLAGS=-static -L" + compiler_lib_path_
     cpp_flags = "CPPFLAGS=-I" + compiler_include_path_
+    cmd_ = "FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix " + output_ + " " + cc + " " + cpp_flags + " " + ld_flags 
 
-    for out in __process_cmd(["./configure", "--prefix", output_, cc, ld_flags, cpp_flags], PATH_TO_TAR):
-        print(out)
+    __process_cmd(cmd_, PATH_TO_TAR)
 
-    for out in __process_cmd(["make", "-j20", "install"], PATH_TO_TAR):
-        print(out)
+    __process_cmd("make -j20 install", PATH_TO_TAR)
 
 
 
